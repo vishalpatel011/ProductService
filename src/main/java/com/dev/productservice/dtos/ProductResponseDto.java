@@ -1,7 +1,11 @@
 package com.dev.productservice.dtos;
 
 import com.dev.productservice.models.Product;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class ProductResponseDto {
     private long id;
     private String name;
