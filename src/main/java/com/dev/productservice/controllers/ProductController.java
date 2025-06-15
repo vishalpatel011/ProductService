@@ -49,4 +49,16 @@ public class ProductController {
         return new ResponseEntity<>(ProductResponseDto.from(product), HttpStatus.CREATED);
     }
 
+    @PutMapping("/products/{id}")
+    public ProductResponseDto replaceProduct(@PathVariable("id") long id, @RequestBody CreateFakeStoreProductRequestDto createFakeStoreProductRequestDto){
+        Product product = productService.replaceProduct(
+                id,
+                createFakeStoreProductRequestDto.getName(),
+                createFakeStoreProductRequestDto.getPrice(),
+                createFakeStoreProductRequestDto.getDescription(),
+                createFakeStoreProductRequestDto.getImageUrl(),
+                createFakeStoreProductRequestDto.getCategory());
+        return ProductResponseDto.from(product);
+    }
+
 }

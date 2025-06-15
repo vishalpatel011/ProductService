@@ -1,10 +1,10 @@
 package com.dev.productservice.services;
 
-import com.dev.productservice.dtos.CreateFakeStoreProductRequestDto;
-import com.dev.productservice.dtos.FakeStoreProductRequestDto;
+import com.dev.productservice.dtos.FakeStoreRequestDto;
 import com.dev.productservice.dtos.FakeStoreResponseDto;
 import com.dev.productservice.exceptions.ProductNotFoundException;
 import com.dev.productservice.models.Product;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -45,19 +45,32 @@ public class FakeStoreProductService implements ProductService{
 
     @Override
     public Product createProduct(String name, double price, String description, String imageUrl, String category) {
-        FakeStoreProductRequestDto fakeStoreProductRequestDto = createDtoFromParam(name, price, description, imageUrl, category);
+        FakeStoreRequestDto fakeStoreProductRequestDto = createDtoFromParam(name, price, description, imageUrl, category);
         FakeStoreResponseDto fakeStoreResponseDto = restTemplate.postForObject("https://fakestoreapi.com/products", fakeStoreProductRequestDto, FakeStoreResponseDto.class, String.class);
         return fakeStoreResponseDto.toProduct();
     }
 
-    private FakeStoreProductRequestDto createDtoFromParam(String name, double price, String description, String imageUrl, String category) {
-        FakeStoreProductRequestDto fakeStoreProductRequestDto = new FakeStoreProductRequestDto();
+    @Override
+    public Product replaceProduct(long id, String name, double price, String description, String imageUrl, String category) {
+        FakeStoreRequestDto updatedfakeStoreRequestDto = createDtoFromParam(name, price, description, imageUrl, category);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<FakeStoreRequestDto> requestEntity = new HttpEntity<>(updatedfakeStoreRequestDto, headers);
+        ResponseEntity<FakeStoreResponseDto>  responseEntity = restTemplate.exchange("https://fakestoreapi.com/products/" + id,
+                HttpMethod.PUT, requestEntity, FakeStoreResponseDto.class);
+        return responseEntity.getBody().toProduct();
+    }
+
+    private FakeStoreRequestDto createDtoFromParam(String name, double price, String description, String imageUrl, String category) {
+        FakeStoreRequestDto fakeStoreProductRequestDto = new FakeStoreRequestDto();
         fakeStoreProductRequestDto.setTitle(name);
         fakeStoreProductRequestDto.setPrice(price);
         fakeStoreProductRequestDto.setDescription(description);
         fakeStoreProductRequestDto.setImage(imageUrl);
         fakeStoreProductRequestDto.setCategory(category);
         return fakeStoreProductRequestDto;
+
     }
 
 }
