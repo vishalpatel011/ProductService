@@ -2,6 +2,7 @@ package com.dev.productservice.controllers;
 
 import com.dev.productservice.dtos.ErrorDto;
 import com.dev.productservice.dtos.ProductResponseDto;
+import com.dev.productservice.exceptions.ProductNotFoundException;
 import com.dev.productservice.models.Product;
 import com.dev.productservice.services.FakeStoreProductService;
 import com.dev.productservice.services.ProductService;
@@ -19,16 +20,9 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}")
-    public ProductResponseDto getProductbyId(@PathVariable("id") long id){
+    public ProductResponseDto getProductbyId(@PathVariable("id") long id) throws ProductNotFoundException {
         Product product = productService.getProductById(id);
         return ProductResponseDto.from(product);
     }
 
-    @ExceptionHandler(NullPointerException.class)
-    public ErrorDto handleNullPointerException() {
-        ErrorDto errorDto = new ErrorDto();
-        errorDto.setMessage("Product not found");
-        errorDto.setStatus("Failure");
-        return errorDto;
-    }
 }
