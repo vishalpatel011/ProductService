@@ -1,12 +1,13 @@
 package com.dev.productservice.controllers;
 
 import com.dev.productservice.dtos.CreateFakeStoreProductRequestDto;
-import com.dev.productservice.dtos.ErrorDto;
 import com.dev.productservice.dtos.ProductResponseDto;
 import com.dev.productservice.exceptions.ProductNotFoundException;
 import com.dev.productservice.models.Product;
-import com.dev.productservice.services.FakeStoreProductService;
 import com.dev.productservice.services.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,11 +55,17 @@ public class ProductController {
         Product product = productService.replaceProduct(
                 id,
                 createFakeStoreProductRequestDto.getName(),
-                createFakeStoreProductRequestDto.getPrice(),
-                createFakeStoreProductRequestDto.getDescription(),
+                createFakeStoreProductRequestDto.getDescription(), createFakeStoreProductRequestDto.getPrice(),
                 createFakeStoreProductRequestDto.getImageUrl(),
                 createFakeStoreProductRequestDto.getCategory());
         return ProductResponseDto.from(product);
     }
 
+    @PatchMapping(value = "/products/{id}", consumes = "application/json-patch+json")
+    public ProductResponseDto patchProduct(@PathVariable("id") long id, @RequestBody JsonPatch jsonPatch) throws ProductNotFoundException, JsonPatchException, JsonProcessingException {
+        Product product = productService.patchProduct(id, jsonPatch);
+        return ProductResponseDto.from(product);
+    }
+
 }
+

@@ -1,9 +1,15 @@
 package com.dev.productservice.services;
 
+import com.dev.productservice.dtos.CreateFakeStoreProductRequestDto;
 import com.dev.productservice.dtos.FakeStoreRequestDto;
 import com.dev.productservice.dtos.FakeStoreResponseDto;
 import com.dev.productservice.exceptions.ProductNotFoundException;
 import com.dev.productservice.models.Product;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -51,7 +57,7 @@ public class FakeStoreProductService implements ProductService{
     }
 
     @Override
-    public Product replaceProduct(long id, String name, double price, String description, String imageUrl, String category) {
+    public Product replaceProduct(long id, String name, String description, double price, String imageUrl, String category) {
         FakeStoreRequestDto updatedfakeStoreRequestDto = createDtoFromParam(name, price, description, imageUrl, category);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -61,6 +67,32 @@ public class FakeStoreProductService implements ProductService{
                 HttpMethod.PUT, requestEntity, FakeStoreResponseDto.class);
         return responseEntity.getBody().toProduct();
     }
+
+    @Override
+    public Product patchProduct(long id, JsonPatch patch) throws ProductNotFoundException, JsonPatchException, JsonProcessingException {
+
+        // Get existing product
+        Product existingProduct = getProductById(id);
+
+        // Convert Product to JSON Format
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode productNode = objectMapper.valueToTree(existingProduct);
+
+        // Apply Patch
+        JsonNode patchedNode = patch.apply(productNode);
+
+        //Convert back to Product
+        Product patchedProduct = objectMapper.treeToValue(patchedNode, Product.class);
+
+        return replaceProduct(id,
+                patchedProduct.getName(),
+                patchedProduct.getDescription(),
+                patchedProduct.getPrice(),
+                patchedProduct.getCategory().getName(),
+                patchedProduct.getImageUrl()
+        );
+    }
+
 
     private FakeStoreRequestDto createDtoFromParam(String name, double price, String description, String imageUrl, String category) {
         FakeStoreRequestDto fakeStoreProductRequestDto = new FakeStoreRequestDto();
@@ -74,3 +106,4 @@ public class FakeStoreProductService implements ProductService{
     }
 
 }
+
