@@ -1,15 +1,19 @@
 package com.dev.productservice.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Product {
-    private long id;
-    private String name;
+@Entity
+public class Product extends Base{
     private String description;
     private String imageUrl;
+    @ManyToOne
     private Category category;
     private double price;
 }
