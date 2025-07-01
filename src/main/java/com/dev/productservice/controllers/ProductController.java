@@ -8,6 +8,7 @@ import com.dev.productservice.services.ProductService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ import java.util.List;
 public class ProductController {
     ProductService productService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(@Qualifier("productDbService") ProductService productService) {
         this.productService = productService;
     }
 
@@ -43,8 +44,8 @@ public class ProductController {
     @PostMapping("/products")
     public ResponseEntity<ProductResponseDto> createProduct(@RequestBody CreateFakeStoreProductRequestDto createFakeStoreProductRequestDto) {
         Product product = productService.createProduct(createFakeStoreProductRequestDto.getName(),
-                                                        createFakeStoreProductRequestDto.getPrice(),
                                                         createFakeStoreProductRequestDto.getDescription(),
+                                                        createFakeStoreProductRequestDto.getPrice(),
                                                         createFakeStoreProductRequestDto.getImageUrl(),
                                                         createFakeStoreProductRequestDto.getCategory());
         return new ResponseEntity<>(ProductResponseDto.from(product), HttpStatus.CREATED);
